@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CheatTable CheatEngineTableVersion="29">
+  <CheatEntries/>
+  <UserdefinedSymbols/>
+  <LuaScript>-- 此处只是定义一些颜色
+local Colors =
+{
+    Black = 0x000000,
+    White = 0xFFFFFF,
+    Silver = 0xC0C0C0,
+    Grey = 0x808080,
+    Red = 0x0000FF, -- 0xFF0000
+    Maroon = 0x000080, -- 0x800000
+    Yellow = 0x00FFFF, -- 0xFFFF00
+    Olive = 0x008080, -- 0x808000
+    Lime = 0x00FF00,
+    Green = 0x008000,
+    Aqua = 0xFFFF00, -- 0x00FFFF
+    Teal = 0x808000, -- 0x008080
+    Blue = 0xFF0000, -- 0x0000FF
+    Navy = 0x800000, -- 0x000080
+    Fuchsia = 0xFF00FF,
+    Purple = 0x800080,
+ }
+
+-- 此处的是实际执行修改的方法，原理是以找到的“爱心数值地址”为基准，
+-- 从这个地址出发偏移特定大小的即为SP/等级/破数/神龙之花/星数/初始星数
+function Operate(findHeartValue)
+
+    local groupCollapse = allAddress.createMemoryRecord()
+    groupCollapse.Color = Colors.Red
+
+    local currentSP = allAddress.createMemoryRecord()
+    local currentLevel = allAddress.createMemoryRecord()
+    local currentMerge = allAddress.createMemoryRecord()
+    local currentDragonFlower = allAddress.createMemoryRecord()
+    local currentRarity = allAddress.createMemoryRecord()
+    local currentInitialRarity = allAddress.createMemoryRecord()
+
+    currentSP.appendToEntry(groupCollapse)
+    currentLevel.appendToEntry(groupCollapse)
+    currentMerge.appendToEntry(groupCollapse)
+    currentDragonFlower.appendToEntry(groupCollapse)
+    currentRarity.appendToEntry(groupCollapse)
+    currentInitialRarity.appendToEntry(groupCollapse)
+
+    currentSP.Type = 13
+    currentSP.CustomTypeName = "X18 XOR"
+    currentSP.setAddress(string.format("%X",tonumber(findHeartValue.Address,16) - 0xd8))
+	currentSP.Value = 9999
+
+    currentRarity.Type = 13
+    currentRarity.CustomTypeName = "X18 XOR"
+    currentRarity.setAddress(string.format("%X",tonumber(findHeartValue.Address,16) - 0x3f0))
+    currentRarity.Value = 5
+
+    currentInitialRarity.Type = 13
+    currentInitialRarity.CustomTypeName = "X18 XOR"
+    currentInitialRarity.setAddress(string.format("%X",tonumber(findHeartValue.Address,16) - 0x3a8))
+    currentInitialRarity.Value = 5
+
+    currentLevel.Type = 13
+    currentLevel.CustomTypeName = "X18 XOR"
+    currentLevel.setAddress(string.format("%X",tonumber(findHeartValue.Address,16) - 0x288))
+    currentLevel.Value = 40
+
+    currentMerge.Type = 13
+    currentMerge.CustomTypeName = "X18 XOR"
+    currentMerge.setAddress(string.format("%X",tonumber(findHeartValue.Address,16) - 0x360))
+    currentMerge.Value = 10
+
+    currentDragonFlower.Type = 13
+    currentDragonFlower.CustomTypeName = "X18 XOR"
+    currentDragonFlower.setAddress(string.format("%X",tonumber(findHeartValue.Address,16) - 0x318))
+    currentDragonFlower.Value = 10
+
+	currentSP.Active = true
+	currentLevel.Active = true
+	currentMerge.Active = true
+    currentRarity.Active = true
+	currentDragonFlower.Active = true
+    currentInitialRarity.Active = true
+
+    memoryrecord_delete(findHeartValue)
+end
+
+function IterateCharacter()
+    allAddress = getAddressList()
+    for i=allAddress.Count, 1, -1 do
+        local currentFind = allAddress[i-1]
+        Operate(currentFind)
+    end
+end
+
+createHotkey(IterateCharacter, VK_F3)
+
+</LuaScript>
+</CheatTable>

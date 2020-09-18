@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CheatTable CheatEngineTableVersion="29">
+  <CheatEntries/>
+  <UserdefinedSymbols/>
+  <LuaScript>local Colors =
+{
+    Black = 0x000000,
+    White = 0xFFFFFF,
+    Silver = 0xC0C0C0,
+    Grey = 0x808080,
+    Red = 0x0000FF, -- 0xFF0000
+    Maroon = 0x000080, -- 0x800000
+    Yellow = 0x00FFFF, -- 0xFFFF00
+    Olive = 0x008080, -- 0x808000
+    Lime = 0x00FF00,
+    Green = 0x008000,
+    Aqua = 0xFFFF00, -- 0x00FFFF
+    Teal = 0x808000, -- 0x008080
+    Blue = 0xFF0000, -- 0x0000FF
+    Navy = 0x800000, -- 0x000080
+    Fuchsia = 0xFF00FF,
+    Purple = 0x800080,
+}
+
+
+str64 = "?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 64 ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? 2A"
+str6B = "?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 6B ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? 2A"
+strEB = "?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 EB ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? 2A"
+strPrefix = "?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 "
+strEmptyAddressPattern = "00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00"
+
+-- 这里的角色ID请替换为你想要的角色 Heroes Values for replacing the new heroes
+strHero1 = "?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 64 B7 49 16 BD 18 3E 42 0E 4E 6E 5F 5B BD 81 2A"
+strHero2 = "?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 EB FC 1C B4 42 E7 C1 BD B1 4F 6E 5F E7 B8 81 2A"
+strHero3 = "?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 64 B7 49 16 BD 18 3E 42 4F 4E 6E 5F 37 2F 86 2A"
+strHero4 = "?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 6B E5 89 B7 42 E7 C1 BD C0 4F 6E 5F EB E7 CD 2A"
+strHero5 = "?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 64 B7 49 16 BD 18 3E 42 05 4E 6E 5F 8B 28 86 2A"
+strHero6 = "?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 64 B7 49 16 BD 18 3E 42 31 4E 6E 5F EF 28 86 2A"
+strHero7 = "?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 64 B7 49 16 BD 18 3E 42 4A 4E 6E 5F 1F 95 87 2A"
+strHero8 = "?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 ?? ?? ?? ?? 00 00 00 00 64 B7 49 16 BD 18 3E 42 2D 4E 6E 5F FF 01 8C 2A"
+
+scanFinished = true         -- 定义是否扫描完毕，防止重复多次点击F4 Flags for control pipeline
+aobScan = nil
+result = {}                 -- 当前扫描的结果，并非用于输出剪贴板 All heroes address Array, not for output
+
+-- remove Repeat values
+function removeRepeated(t)
+     local aa={}
+     for key,val in pairs(t) do
+         aa[val]=true
+     end
+     local bb={}
+     for key,val in pairs(aa) do
+         table.insert(bb,key)
+     end
+     return bb
+end
+
+-- 实际扫描的函数 Actually searching function
+function doSearch(strForSearch, addRecordToAddressList, descriptions)
+
+    if (aobScan == nil) then
+       aobScan = createMemScan()
+    end
+
+    aobScan.newScan()
+    memscan_firstScan(aobScan, soExactValue, vtByteArray, rtRounded, strForSearch, "", 0x0000000000000000, 0x00007fffffffffff, "*X*C*W", fsmNotAligned, "", true, false, false, false)
+    memscan_waitTillDone(aobScan)
+    local fl = createFoundList(aobScan)
+    foundlist_initialize(fl)
+    local flcount = foundlist_getCount(fl)
+
+    -- 对比和填充结果 checking values and fill the results
+    for i = 0, flcount - 1 do
+        local emptyResult = string.find(fl.Value[i], strEmptyAddressPattern)
+        if (emptyResult == nil) then
+            local tempResult = strPrefix .. string.sub(fl.Value[i], -48)
+            local strAdd = string.format("%X",tonumber(fl.Address[i], 16))
+
+            if (addRecordToAddressList == false) then
+                result[strAdd] = tempResult
+            end
+
+            if (addRecordToAddressList == true) then
+               local recordTmp = getAddressList().createMemoryRecord()
+               recordTmp.Description = descriptions
+               recordTmp.setAddress(string.format("%X",tonumber(fl.Address[i], 16)))
+               recordTmp.Type = 8
+               recordTmp.ShowAsHex = true
+               recordTmp.Aob.Size = 56
+               recordTmp.Value = fl.Value[i]
+            end
+        end
+    end
+
+    foundlist_deinitialize(fl)
+end
+
+-- 开始搜索 Search entry function
+function DoHeroesResearch()
+
+    if(not scanFinished) then
+        return
+    end
+
+    local lastCheckedResults = {}     -- Last checked Results
+    local allValues = ""              -- All heroes address Array for output, one address, one line 当前扫描结果，用于输出到剪贴板，每行一个地址
+
+    scanFinished = false
+    local fileForAnalysis = nil                             --Last searching files for analysis 上一次扫描结果的文件句柄，用于分析对比，用完记得close
+    local loadFileDialog = createOpenDialog(self)           --Dialog for load your last searching file 打开文件对话框
+    loadFileDialog.InitalDir = os.getenv('%USERPROFILE%')
+    loadFileDialog.Title = "选择包含有所有英雄ID的txt文件"
+    loadFileDialog.Options = "[ofReadOnly, ofPathMustExist, ofFileMustExist]"
+
+    if loadFileDialog.execute() then
+        fileForAnalysis = io.open(loadFileDialog.FileName, "r")
+        if (fileForAnalysis == nil) then
+            io.close(fileForAnalysis)
+            showMessage("该文件不存在或者正在被其他程序打开!")
+            result = {}
+            lastCheckedResults = {}
+            scanFinished = true
+            return
+        else
+            for line in fileForAnalysis:lines() do
+                table.insert(lastCheckedResults, line)
+            end
+            io.close(fileForAnalysis)
+        end
+    end
+
+    -- 搜索自定义角色ID并把他们显示在搜索结果栏里 searching old characters' addresses and put them into record form
+    doSearch(strHero1, true, "Hero1")
+    doSearch(strHero2, true, "Hero2")
+    doSearch(strHero3, true, "Hero3")
+    doSearch(strHero4, true, "Hero4")
+    doSearch(strHero5, true, "Hero5")
+    doSearch(strHero6, true, "Hero6")
+    doSearch(strHero7, true, "Hero7")
+    doSearch(strHero8, true, "Hero8")
+
+    -- 搜索所有符合规则的角色地址 searching all characters' addresses
+    doSearch(str64, false, "")
+    doSearch(str6B, false, "")
+    doSearch(strEB, false, "")
+
+    result = removeRepeated(result)
+    local length = (result and #result) or 0
+
+    if (length == 0) then
+        showMessage("找不到任何结果，请检查脚本是否有误")
+        result = {}
+        lastCheckedResults = {}
+        scanFinished = true
+        return;
+    end
+
+    local addressList = getAddressList()
+
+    --check
+    if (#lastCheckedResults &gt; 0) then
+        local printCount = 1              -- For print different values
+        for k,v in ipairs(result) do
+            local exist = false
+
+            for i = 1, #lastCheckedResults do
+                if(lastCheckedResults[i] == v) then
+                    exist = true
+                    break
+                end
+            end
+
+            if (not exist) then
+                print(tostring(printCount) .. ": " .. v)
+
+                aobScan.newScan()
+                memscan_firstScan(aobScan, soExactValue, vtByteArray, rtRounded, v, "", 0x0000000000000000, 0x00007fffffffffff, "*X*C*W", fsmNotAligned, "", true, false, false, false)
+                memscan_waitTillDone(aobScan)
+                local fl = createFoundList(aobScan)
+                foundlist_initialize(fl)
+
+                -- 如果有新角色存在，那么把这些新角色的ID按顺序替换到strHero1~strHero8里 replacing the new heroes values
+                addressList[printCount - 1].Color = Colors.Red
+                addressList[printCount - 1].Value = fl.Value[0]
+                printCount = printCount + 1
+
+                foundlist_deinitialize(fl)
+            end
+        end
+    end
+
+    -- Build up resultValues 分割每行数据
+    if(length &gt; 0) then
+        for k,v in ipairs(result) do
+            allValues=allValues.. v .."\n"
+        end
+    end
+
+    writeToClipboard(allValues)
+    showMessage("新角色的ID已经输出到弹窗中，并且所有角色的ID已经复制到了剪贴板上，请在你想要粘贴的文本文件里按下Ctrl+V")
+    allValues = nil
+    result = nil
+    lastCheckedResults = nil
+    scanFinished = true
+end
+
+createHotkey(DoHeroesResearch, VK_F4)
+</LuaScript>
+</CheatTable>
